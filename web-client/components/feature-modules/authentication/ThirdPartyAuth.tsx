@@ -1,0 +1,52 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { ClassNameProps } from "@/lib/interfaces/shared/interface";
+import { cn } from "@/lib/utils/utils";
+import React from "react";
+import { FaGithub, FaGoogle } from "react-icons/fa";
+
+interface ThirdPartyProps extends ClassNameProps {
+    iconClass?: string;
+    text?: string;
+    callback?: string;
+}
+
+const ThirdParty: React.FC<ThirdPartyProps> = ({
+    className,
+    iconClass,
+    text,
+    callback,
+}) => {
+    return (
+        <>
+            <div className={cn("w-full flex h-fit items-center", className)}>
+                <div className="h-[2px] flex flex-grow bg-foreground rounded-lg"></div>
+                <div className="px-4">
+                    {"Or"} {!text && " continue with"}
+                </div>
+                <div className="h-[2px] flex flex-grow bg-foreground rounded-lg"></div>
+            </div>
+            <section className=" space-y-2">
+                <Button
+                    onClick={() => undefined}
+                    variant={"outline"}
+                    className="w-full font-semibold relative"
+                >
+                    <FaGithub className={cn("text-base", iconClass)} />
+                    <span className="ml-2">{text} GitHub</span>
+                </Button>
+                <Button
+                    onClick={() => undefined}
+                    variant={"outline"}
+                    className="w-full font-semibold relative"
+                >
+                    <FaGoogle className={cn("text-base", iconClass)} />
+                    <span className="ml-2">{text} Google</span>
+                </Button>
+            </section>
+        </>
+    );
+};
+
+export default ThirdParty;
