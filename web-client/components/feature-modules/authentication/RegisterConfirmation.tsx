@@ -114,6 +114,7 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
         toast.promise(response, {
             loading: "Verifying OTP...",
             success: () => {
+                router.push("/dashboard");
                 return "OTP Verified Successfully";
             },
             error: (error) => {
