@@ -1,5 +1,5 @@
 export interface FormFieldProps<T> {
     value: T;
-    onChange: (date: T) => void;
+    onChange: (value: T) => void;
     onBlur?: () => void;
 }
