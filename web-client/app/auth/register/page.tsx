@@ -2,18 +2,15 @@
 
 import { AuthFormWrapper } from "@/components/feature-modules/authentication/AuthFormWrapper";
 import RegisterForm from "@/components/feature-modules/authentication/Register";
-import {
-    confirmEmailSignupWithOTP,
-    registerWithEmailPasswordCredentials,
-} from "@/lib/utils/auth/auth.utils";
+import { AuthClientHelper } from "@/lib/interfaces/auth/auth.interfaces";
+import { supabaseServerAuthHelper } from "@/lib/utils/auth/auth.utils";
 
-const page = () => {
+const page = async () => {
+    const authHelper: AuthClientHelper = await supabaseServerAuthHelper();
+
     return (
         <AuthFormWrapper>
-            <RegisterForm
-                credentialCallback={registerWithEmailPasswordCredentials}
-                otpCallback={confirmEmailSignupWithOTP}
-            />
+            <RegisterForm callbacks={authHelper} />
         </AuthFormWrapper>
     );
 };

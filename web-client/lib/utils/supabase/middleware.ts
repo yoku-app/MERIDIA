@@ -40,19 +40,6 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // Redirect user to onboarding page if they have not completed the core onboarding process
-    console.log(user);
-    if (
-        user &&
-        !user.email_confirmed_at &&
-        request.nextUrl.pathname !== "/auth/onboard"
-    ) {
-        // The email is confirmed during onboarding through an OTP
-        const url = request.nextUrl.clone();
-        url.pathname = "auth/onboard";
-        return NextResponse.redirect(url);
-    }
-
     // Filter out any access to protected routes, if user is not authenticated
     if (!user && !isRoutePathUnprotected(request.nextUrl.pathname)) {
         const url = request.nextUrl.clone();

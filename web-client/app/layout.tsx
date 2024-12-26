@@ -3,8 +3,8 @@ import { Navbar } from "@/components/ui/navbar";
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import { Toaster } from "sonner";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const robotoFont = Roboto({
     subsets: ["latin"],
@@ -29,7 +29,7 @@ const RootLayout: FCWC<Propless> = ({ children }) => {
                     <Navbar />
                     {children}
                 </ThemeProvider>
-                <Toaster />
+                <Toaster richColors/>
             </body>
         </html>
     );

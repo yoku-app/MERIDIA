@@ -7,7 +7,7 @@ export const AuthFormWrapper: FCWC<Propless> = ({ children }) => {
         <>
             <BackgroundBeams />
             <section className="h-screen-without-header bg-background/20 flex justify-center items-center">
-                <Card className="p-6 relative transition-all">{children}</Card>
+                <Card className="p-6 relative transition-all bg-background/70 backdrop-blur-sm">{children}</Card>
             </section>
         </>
     );

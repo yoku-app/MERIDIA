@@ -11,6 +11,7 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { SocialProviders } from "@/lib/interfaces/auth/auth.interfaces";
 import Link from "next/link";
 import { FC, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
@@ -21,11 +22,13 @@ import ThirdParty from "./ThirdPartyAuth";
 interface CredentialRegistrationProps {
     registrationForm: UseFormReturn<Registration>;
     handleSubmission: (values: Registration) => void;
+    socialProviderAuthentication: (provider: SocialProviders) => Promise<void>;
 }
 
 const RegisterCredentials: FC<CredentialRegistrationProps> = ({
     registrationForm,
     handleSubmission,
+    socialProviderAuthentication,
 }) => {
     const [passwordRequirementsVisible, setPasswordRequirementsVisible] =
         useState<boolean>(false);
@@ -91,6 +94,24 @@ const RegisterCredentials: FC<CredentialRegistrationProps> = ({
                                 </FormItem>
                             )}
                         />
+                        <FormField
+                            control={registrationForm.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem className="mt-4">
+                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            className="w-full my-2"
+                                            type="password"
+                                            {...field}
+                                            placeholder="••••••••••"
+                                        />
+                                    </FormControl>
+                                    <FormMessage className="font-semibold" />
+                                </FormItem>
+                            )}
+                        />
                         <PasswordRequirements
                             control={registrationForm.control}
                             visible={passwordRequirementsVisible}
@@ -104,7 +125,10 @@ const RegisterCredentials: FC<CredentialRegistrationProps> = ({
                     </form>
                 </Form>
 
-                <ThirdParty className="my-6" />
+                <ThirdParty
+                    socialProviderAuthentication={socialProviderAuthentication}
+                    className="my-6"
+                />
                 <section className="my-4 text-sm mx-2 text-neutral-700 dark:text-neutral-400">
                     <span>Already have an account?</span>
                     <Link

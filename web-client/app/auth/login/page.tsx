@@ -1,11 +1,13 @@
 import { AuthFormWrapper } from "@/components/feature-modules/authentication/AuthFormWrapper";
 import LoginForm from "@/components/feature-modules/authentication/Login";
-import { loginWithEmailPasswordCredentials } from "@/lib/utils/auth/auth.utils";
+import { supabaseServerAuthHelper } from "@/lib/utils/auth/auth.utils";
 
-const page = () => {
+const page = async () => {
+    const authenticationHelper = await supabaseServerAuthHelper();
+
     return (
         <AuthFormWrapper>
-            <LoginForm credentialCallback={loginWithEmailPasswordCredentials} />
+            <LoginForm callbacks={authenticationHelper} />
         </AuthFormWrapper>
     );
 };

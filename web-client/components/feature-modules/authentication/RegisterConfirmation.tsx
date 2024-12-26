@@ -2,82 +2,116 @@
 
 import { Button } from "@/components/ui/button";
 import { CardContent, CardHeader } from "@/components/ui/card";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { FormDatePicker } from "@/components/ui/forms/form-date-picker";
+import { Form, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { FormOTPInput } from "@/components/ui/forms/form-otp-input";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useSupabaseClient } from "@/hooks/useSupabaseClient";
-import { CredentialConfirmationDetails } from "@/lib/interfaces/auth/auth.interfaces";
+import {
+    AuthenticationProps,
+    RegistrationConfirmation,
+} from "@/lib/interfaces/auth/auth.interfaces";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
+import { Control, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Registration } from "./Register";
 
-interface RegisterConfirmationProps {
-    email: string;
-    visibilityCallback: (visibility: boolean) => void;
-    otpVerificationCallback: (
-        email: string,
-        details: CredentialConfirmationDetails
-    ) => Promise<boolean>;
+interface RegisterConfirmationProps extends AuthenticationProps {
+    visibilityCallback: (visible: boolean) => void;
+    formControl: Control<Registration>;
 }
 
-const MIN_DATE = new Date("1900-01-01");
-const MAX_DATE = new Date();
+//todo: Move Commented out code into Onboarding Component for Shared Onboarding Process with Social Auth
+
+// const MIN_DATE = new Date("1900-01-01");
+// const MAX_DATE = new Date();
 
 const userRegisterDetailsSchema = z.object({
     otp: z
         .string()
         .length(6, "OTP must be 6 characters long")
         .regex(/^\d+$/, "Must contain only digits"),
-    firstName: z.string().nonempty("First Name is required"),
-    lastName: z.string().nonempty("Last Name is required"),
-    dob: z
-        .date({
-            required_error: "Date of Birth is required",
-            invalid_type_error: "Invalid Date of Birth",
-        })
-        .max(MAX_DATE, "Googoo Gaagaa??")
-        .min(MIN_DATE, "Bro??"),
+    // firstName: z.string().nonempty("First Name is required"),
+    // lastName: z.string().nonempty("Last Name is required"),
+    // dob: z
+    //     .date({
+    //         required_error: "Date of Birth is required",
+    //         invalid_type_error: "Invalid Date of Birth",
+    //     })
+    //     .max(MAX_DATE, "Googoo Gaagaa??")
+    //     .min(MIN_DATE, "Bro??"),
 });
 
 type UserRegistrationDetails = z.infer<typeof userRegisterDetailsSchema>;
 
 const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
-    email,
-    otpVerificationCallback,
+    formControl,
+    callbacks,
     visibilityCallback,
 }) => {
+    const { confirmEmailSignupWithOTP, handleResendOTP } = callbacks;
     const [otpVerifyError, setOtpVerifyError] = useState<boolean>(false);
-    const client = useSupabaseClient("client");
+    const formDetails = useWatch({ control: formControl });
     const userDetailsForm = useForm<UserRegistrationDetails>({
         resolver: zodResolver(userRegisterDetailsSchema),
         defaultValues: {
             otp: "",
-            firstName: "",
-            lastName: "",
-            dob: undefined,
+            // firstName: "",
+            // lastName: "",
+            // dob: undefined,
         },
     });
+
+    const router = useRouter();
 
     const handleCancel = () => {
         userDetailsForm.reset();
         visibilityCallback(false);
     };
 
+    const handleTokenResend = async () => {
+        if (!formDetails.email) return;
+
+        const response = handleResendOTP(formDetails.email).then((res) => {
+            if (!res.ok) {
+                throw new Error(res?.error?.message ?? "Failed to resend OTP");
+            }
+        });
+
+        toast.promise(response, {
+            loading: "Resending OTP...",
+            success: () => {
+                return "OTP Resent Successfully";
+            },
+            error: (error) => {
+                return error.message;
+            },
+        });
+    };
+
     const handleSubmission = async (values: UserRegistrationDetails) => {
+        if (!formDetails.email || !formDetails.password) return;
+
         setOtpVerifyError(false);
-        toast.promise(otpVerificationCallback(email, values), {
+        const credentialValidation: RegistrationConfirmation = {
+            email: formDetails.email,
+            password: formDetails.password,
+            otp: values.otp,
+        };
+
+        const response = confirmEmailSignupWithOTP(credentialValidation).then(
+            (res) => {
+                if (!res.ok) {
+                    throw new Error(
+                        res?.error?.message ?? "Failed to verify OTP"
+                    );
+                }
+            }
+        );
+
+        toast.promise(response, {
             loading: "Verifying OTP...",
             success: () => {
                 return "OTP Verified Successfully";
@@ -89,30 +123,26 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
         });
 
         if (!otpVerifyError) return;
-
-        //Todo: Contact the User service to create a new User row
     };
 
     return (
         <>
             <CardHeader className="pb-0">
                 <h1 className="text-xl lg:text-2xl font-bold">
-                    Lets set up your account
+                    Welcome aboard!
                 </h1>
                 <h2 className="max-w-sm font-semibold text-neutral-500 dark:text-neutral-400">
-                    Tell us more about yourself so we can finalise your account
-                    creation
+                    Confirm your email to get your account started
                 </h2>
             </CardHeader>
             <CardContent className="flex flex-col ">
                 <Form {...userDetailsForm}>
                     <form
-                        className="mt-6"
                         onSubmit={userDetailsForm.handleSubmit(
                             handleSubmission
                         )}
                     >
-                        <FormField
+                        {/* <FormField
                             control={userDetailsForm.control}
                             name="firstName"
                             render={({ field }) => (
@@ -169,17 +199,14 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
                                     <FormMessage className="font-semibold" />
                                 </FormItem>
                             )}
-                        />
+                        /> */}
 
                         <FormField
                             control={userDetailsForm.control}
                             name="otp"
                             render={({ field }) => (
-                                <FormItem className="mt-3">
-                                    <FormLabel className="font-semibold">
-                                        Email Confirmation
-                                    </FormLabel>
-                                    <div className="my-2">
+                                <FormItem className="mt-4">
+                                    <div className="my-2 pb-2">
                                         <FormOTPInput
                                             className={
                                                 otpVerifyError
@@ -192,21 +219,31 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
                                             groups={2}
                                         />
                                     </div>
+                                    <FormMessage className="font-semibold" />
                                     <div className="text-neutral-500 dark:text-neutral-400 text-sm w-full">
                                         Please enter your 6 digit OTP sent to{" "}
                                         <span className="text-secondary-foreground font-semibold">
-                                            {email}
+                                            {formDetails.email}
                                         </span>
                                     </div>
-                                    <div className="text-sm underline cursor-pointer hover:text-primary text-muted-foreground underline-offset-4">
+                                    <Button
+                                        type="button"
+                                        onClick={handleTokenResend}
+                                        variant={"link"}
+                                        className="text-sm underline cursor-pointer hover:text-primary text-muted-foreground underline-offset-4 p-0"
+                                    >
                                         Didn't Receive an Email?
-                                    </div>
+                                    </Button>
                                 </FormItem>
                             )}
                         />
-                        <Separator className="mt-6 mb-4" />
+                        <Separator className="my-4" />
                         <footer className="mt-4 flex justify-between">
-                            <Button variant={"outline"} onClick={handleCancel}>
+                            <Button
+                                type="button"
+                                variant={"outline"}
+                                onClick={handleCancel}
+                            >
                                 <ArrowLeft className="w-4 h-4" />
                                 <span className="font-semibold">Back</span>
                             </Button>
@@ -222,7 +259,3 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
 };
 
 export default RegisterConfirmation;
-
-interface OTPConfirmationProps {
-    formControl: UseFormReturn<UserRegistrationDetails>;
-}

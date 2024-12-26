@@ -2,6 +2,7 @@
 
 import { useSupabaseClient } from "@/hooks/useSupabaseClient";
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
+import { handleUserSignout } from "@/lib/utils/auth/auth.utils";
 import { Session, SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { FC } from "react";
@@ -9,8 +10,9 @@ import { Button } from "./button";
 import { ModeToggle } from "./themeToggle";
 
 export const Navbar = async () => {
-    const supabaseClient: SupabaseClient = await useSupabaseClient("server");
+    "use server";
 
+    const supabaseClient: SupabaseClient = await useSupabaseClient("server");
     // User session can be spoofed, but we are just using this
     // information to validate user information instead of information protection
     const { data, error } = await supabaseClient.auth.getSession();
@@ -19,11 +21,36 @@ export const Navbar = async () => {
         return <UnauthenticatedNavbar />;
     }
 
-    return <AuthenticatedNavbar {...data.session} />;
+    return (
+        <AuthenticatedNavbar
+            {...data.session}
+            handleSignout={handleUserSignout}
+        />
+    );
 };
 
-const AuthenticatedNavbar: FC<Session> = () => {
-    return <NavbarWrapper>Authenticated</NavbarWrapper>;
+interface AuthenticatedProps extends Session {
+    handleSignout: () => Promise<void>;
+}
+
+const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
+    handleSignout,
+    user,
+}) => {
+    "use client";
+
+    return (
+        <NavbarWrapper>
+            <div className="w-full flex">
+                <div className="w-auto flex-grow">Authenticated</div>
+                <div className="mr-2">
+                    <Button onClick={handleSignout} variant={"outline"}>
+                        Logout
+                    </Button>
+                </div>
+            </div>
+        </NavbarWrapper>
+    );
 };
 
 const UnauthenticatedNavbar: FC<Propless> = () => {
@@ -44,6 +71,8 @@ const UnauthenticatedNavbar: FC<Propless> = () => {
 };
 
 const NavbarWrapper: FCWC<Propless> = ({ children }) => {
+    "use client";
+
     return (
         <div className="h-[4rem] sticky top-0 w-full border-b flex items-center px-4 bg-background/40 backdrop-blur-[4px]">
             {children}
