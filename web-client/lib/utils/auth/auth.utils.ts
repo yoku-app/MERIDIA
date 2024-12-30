@@ -1,4 +1,3 @@
-import { useSupabaseClient } from "@/hooks/useSupabaseClient";
 import {
     AuthClientHelper,
     AuthenticationCredentials,
@@ -8,6 +7,7 @@ import {
 } from "@/lib/interfaces/auth/auth.interfaces";
 import { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { createSSRClient } from "../supabase/client";
 
 /**
  * Determines if a route path that a user is trying to accesss is unprotected
@@ -38,7 +38,7 @@ export const isRoutePathUnprotected = (pathname: string): boolean => {
 export const handleUserSignout = async (): Promise<void> => {
     "use server";
 
-    const client: SupabaseClient = await useSupabaseClient("server");
+    const client: SupabaseClient = await createSSRClient();
     const { error } = await client.auth.signOut();
     if (error) {
         if (process.env.NODE_ENV === "development") console.error(error);
@@ -64,7 +64,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
         "use server";
 
         // instantiate supabase client singleton
-        const client: SupabaseClient = await useSupabaseClient("server");
+        const client: SupabaseClient = await createSSRClient();
         // Attempt user sign in with provided credentials
         const { email, password } = credentials;
         const { error } = await client.auth.signInWithPassword({
@@ -89,7 +89,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
         "use server";
 
         // instantiate supabase client singleton
-        const client: SupabaseClient = await useSupabaseClient("server");
+        const client: SupabaseClient = await createSSRClient();
         // Attempt user registration with provided credentials
         const { data, error } = await client.auth.signUp({
             ...credentials,
@@ -131,7 +131,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
     ): Promise<AuthResponse> => {
         "use server";
         // instantiate supabase client singleton
-        const client: SupabaseClient = await useSupabaseClient("server");
+        const client: SupabaseClient = await createSSRClient();
         const { otp, email, password } = userDetails;
         // Attempt email confirmation with provided OTP
         const { error } = await client.auth.verifyOtp({
@@ -168,11 +168,11 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
     ): Promise<void> => {
         "use server";
         // instantiate supabase client singleton
-        const client: SupabaseClient = await useSupabaseClient("server");
+        const client: SupabaseClient = await createSSRClient();
         const { data } = await client.auth.signInWithOAuth({
             provider,
             options: {
-                redirectTo: `${process.env.NEXT_PUBLIC_HOSTED_URL}/api/auth/token/callback`,
+                redirectTo: `${process.env.NEXT_PUBLIC_HOSTED_URL}api/auth/token/callback`,
                 queryParams: {
                     access_type: "offline",
                     prompt: "consent",
@@ -193,7 +193,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
         "use server";
 
         // instantiate supabase client singleton
-        const client: SupabaseClient = await useSupabaseClient("server");
+        const client: SupabaseClient = await createSSRClient();
 
         const { error } = await client.auth.resend({
             type: "signup",

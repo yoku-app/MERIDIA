@@ -13,3 +13,9 @@ export interface ChildNodeProps {
 export interface ClassNameProps {
     className?: string;
 }
+
+export interface ControllerResponse<T>{
+    status: number;
+    data?: T;
+    error?: string;
+}
