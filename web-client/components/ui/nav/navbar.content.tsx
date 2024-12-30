@@ -1,48 +1,28 @@
-"use server";
+"use client";
 
-import { useSupabaseClient } from "@/hooks/useSupabaseClient";
+import { useUserStore } from "@/components/provider/user.provider";
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
-import { handleUserSignout } from "@/lib/utils/auth/auth.utils";
-import { Session, SupabaseClient } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
 import Link from "next/link";
 import { FC } from "react";
-import { Button } from "./button";
-import { ModeToggle } from "./themeToggle";
-
-export const Navbar = async () => {
-    "use server";
-
-    const supabaseClient: SupabaseClient = await useSupabaseClient("server");
-    // User session can be spoofed, but we are just using this
-    // information to validate user information instead of information protection
-    const { data, error } = await supabaseClient.auth.getSession();
-
-    if (error || !data?.session) {
-        return <UnauthenticatedNavbar />;
-    }
-
-    return (
-        <AuthenticatedNavbar
-            {...data.session}
-            handleSignout={handleUserSignout}
-        />
-    );
-};
+import { Button } from "../button";
+import { ModeToggle } from "../themeToggle";
 
 interface AuthenticatedProps extends Session {
     handleSignout: () => Promise<void>;
 }
 
-const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
+export const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
     handleSignout,
     user,
 }) => {
-    "use client";
+    const { user: userProfile } = useUserStore((state) => state);
 
     return (
         <NavbarWrapper>
             <div className="w-full flex">
                 <div className="w-auto flex-grow">Authenticated</div>
+                <div>{userProfile?.displayName}</div>
                 <div className="mr-2">
                     <Button onClick={handleSignout} variant={"outline"}>
                         Logout
@@ -53,7 +33,7 @@ const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
     );
 };
 
-const UnauthenticatedNavbar: FC<Propless> = () => {
+export const UnauthenticatedNavbar: FC<Propless> = () => {
     return (
         <NavbarWrapper>
             <div className="flex justify-end mr-4 flex-grow w-auto">
@@ -70,9 +50,7 @@ const UnauthenticatedNavbar: FC<Propless> = () => {
     );
 };
 
-const NavbarWrapper: FCWC<Propless> = ({ children }) => {
-    "use client";
-
+export const NavbarWrapper: FCWC<Propless> = ({ children }) => {
     return (
         <div className="h-[4rem] sticky top-0 w-full border-b flex items-center px-4 bg-background/40 backdrop-blur-[4px]">
             {children}

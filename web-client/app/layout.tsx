@@ -1,10 +1,12 @@
-import { ThemeProvider } from "@/components/provider/theme-provider";
-import { Navbar } from "@/components/ui/navbar";
+import { ThemeProvider } from "@/components/provider/theme.provider";
+import { Navbar } from "@/components/ui/nav/navbar";
+import AuthenticationWrapper from "@/components/util/auth.wrapper";
+import StoreProviderWrapper from "@/components/util/store.wrapper";
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import "./globals.css";
 import { Toaster } from "sonner";
+import "./globals.css";
 
 const robotoFont = Roboto({
     subsets: ["latin"],
@@ -18,7 +20,11 @@ export const metadata: Metadata = {
 
 const RootLayout: FCWC<Propless> = ({ children }) => {
     return (
-        <html lang="en" suppressHydrationWarning>
+        <html
+            className={robotoFont.className}
+            lang="en"
+            suppressHydrationWarning
+        >
             <body className={`antialiased`}>
                 <ThemeProvider
                     attribute={"class"}
@@ -26,10 +32,14 @@ const RootLayout: FCWC<Propless> = ({ children }) => {
                     enableSystem
                     disableTransitionOnChange
                 >
-                    <Navbar />
-                    {children}
+                    <StoreProviderWrapper>
+                        <AuthenticationWrapper>
+                            <Navbar />
+                            {children}
+                        </AuthenticationWrapper>
+                    </StoreProviderWrapper>
                 </ThemeProvider>
-                <Toaster richColors/>
+                <Toaster richColors />
             </body>
         </html>
     );
