@@ -1,5 +1,4 @@
 import { UserProfile } from "@/lib/interfaces/user/user.interface";
-import { defaultUserObject } from "@/lib/utils/user/user.util";
 import { createStore } from "zustand/vanilla";
 
 export type UserState = {
@@ -14,7 +13,7 @@ export type UserActions = {
 export type UserStore = UserState & UserActions;
 
 export const defaultUserInitState: UserState = {
-    user: defaultUserObject,
+    user: null,
 };
 
 export const createUserStore = (
