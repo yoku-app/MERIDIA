@@ -23,25 +23,11 @@ interface RegisterConfirmationProps extends AuthenticationProps {
     formControl: Control<Registration>;
 }
 
-//todo: Move Commented out code into Onboarding Component for Shared Onboarding Process with Social Auth
-
-// const MIN_DATE = new Date("1900-01-01");
-// const MAX_DATE = new Date();
-
 const userRegisterDetailsSchema = z.object({
     otp: z
         .string()
         .length(6, "OTP must be 6 characters long")
         .regex(/^\d+$/, "Must contain only digits"),
-    // firstName: z.string().nonempty("First Name is required"),
-    // lastName: z.string().nonempty("Last Name is required"),
-    // dob: z
-    //     .date({
-    //         required_error: "Date of Birth is required",
-    //         invalid_type_error: "Invalid Date of Birth",
-    //     })
-    //     .max(MAX_DATE, "Googoo Gaagaa??")
-    //     .min(MIN_DATE, "Bro??"),
 });
 
 type UserRegistrationDetails = z.infer<typeof userRegisterDetailsSchema>;
@@ -58,9 +44,6 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
         resolver: zodResolver(userRegisterDetailsSchema),
         defaultValues: {
             otp: "",
-            // firstName: "",
-            // lastName: "",
-            // dob: undefined,
         },
     });
 
@@ -143,65 +126,6 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
                             handleSubmission
                         )}
                     >
-                        {/* <FormField
-                            control={userDetailsForm.control}
-                            name="firstName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="mt-4 font-semibold">
-                                        First Name
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="w-full my-2"
-                                            {...field}
-                                            placeholder="John"
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="font-semibold" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={userDetailsForm.control}
-                            name="lastName"
-                            render={({ field }) => (
-                                <FormItem className="mt-2">
-                                    <FormLabel className="mt-4 font-semibold">
-                                        Last Name
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="w-full my-2"
-                                            {...field}
-                                            placeholder="Doe"
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="font-semibold" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={userDetailsForm.control}
-                            name="dob"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel className="mt-4 font-semibold">
-                                        Date of Birth
-                                    </FormLabel>
-                                    <FormControl>
-                                        <FormDatePicker
-                                            className="w-full"
-                                            field={field}
-                                            minDate={MIN_DATE}
-                                            maxDate={MAX_DATE}
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="font-semibold" />
-                                </FormItem>
-                            )}
-                        /> */}
-
                         <FormField
                             control={userDetailsForm.control}
                             name="otp"

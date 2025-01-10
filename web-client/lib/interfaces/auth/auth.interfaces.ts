@@ -1,12 +1,8 @@
 import { AuthError } from "@supabase/supabase-js";
+import { SupabaseClientResponse } from "../shared/interface";
 
 export interface AuthenticationProps {
     callbacks: AuthClientHelper;
-}
-
-export interface AuthResponse {
-    ok: boolean;
-    error: AuthError | null;
 }
 
 export type SocialProviders = "google" | "facebook" | "github" | "linkedin";
@@ -19,6 +15,8 @@ export interface AuthenticationCredentials {
 export interface RegistrationConfirmation extends AuthenticationCredentials {
     otp: string;
 }
+
+export type AuthResponse = SupabaseClientResponse<AuthError>;
 
 export interface AuthClientHelper {
     loginWithEmailPasswordCredentials: (
@@ -34,4 +32,9 @@ export interface AuthClientHelper {
         provider: SocialProviders
     ) => Promise<void>;
     handleResendOTP: (email: string) => Promise<AuthResponse>;
+}
+
+export interface MobileVerificationHelper {
+    sendVerificationCode: (phone: string) => Promise<AuthResponse>;
+    verifyMobile: (phone: string, otp: string) => Promise<AuthResponse>;
 }

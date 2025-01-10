@@ -21,3 +21,9 @@ export const fetchUserProfile = async (
 
     return { status: response.status, error: response.statusText };
 };
+
+export const updateUserProfile = async (user: UserProfile): Promise<
+    ControllerResponse<UserProfile>
+> => {
+    return { status: 200 };
+};

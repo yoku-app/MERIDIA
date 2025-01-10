@@ -1,6 +1,7 @@
 import { ThemeProvider } from "@/components/provider/theme.provider";
 import { Navbar } from "@/components/ui/nav/navbar";
 import AuthenticationWrapper from "@/components/util/auth.wrapper";
+import { OnboardWrapper } from "@/components/util/onboard.wrapper";
 import StoreProviderWrapper from "@/components/util/store.wrapper";
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
 import type { Metadata } from "next";
@@ -34,8 +35,10 @@ const RootLayout: FCWC<Propless> = ({ children }) => {
                 >
                     <StoreProviderWrapper>
                         <AuthenticationWrapper>
-                            <Navbar />
-                            {children}
+                            <OnboardWrapper>
+                                <Navbar />
+                                {children}
+                            </OnboardWrapper>
                         </AuthenticationWrapper>
                     </StoreProviderWrapper>
                 </ThemeProvider>

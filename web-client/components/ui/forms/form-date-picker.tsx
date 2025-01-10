@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 interface FormDatePicker extends ClassNameProps {
     field: FormFieldProps<Date | undefined>;
     minDate?: Date;
+    modal?: boolean;
     maxDate?: Date;
 }
 
@@ -21,9 +22,10 @@ export const FormDatePicker: FC<FormDatePicker> = ({
     className,
     minDate,
     maxDate,
+    modal = true,
 }) => {
     return (
-        <Popover>
+        <Popover modal={modal}>
             <PopoverTrigger asChild>
                 <Button
                     variant={"outline"}
@@ -41,7 +43,11 @@ export const FormDatePicker: FC<FormDatePicker> = ({
                     )}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="start" className=" w-auto p-0">
+            <PopoverContent
+                insideDialog={true}
+                align="start"
+                className=" w-auto p-0 pointer-events-auto"
+            >
                 <Calendar
                     mode="single"
                     captionLayout="dropdown-buttons"
@@ -49,6 +55,10 @@ export const FormDatePicker: FC<FormDatePicker> = ({
                     onSelect={field.onChange}
                     fromYear={minDate?.getFullYear() ?? 1960}
                     toYear={maxDate?.getFullYear() ?? 2030}
+                    disabled={{
+                        before: minDate || new Date("1900-01-01"),
+                        after: maxDate,
+                    }}
                 />
             </PopoverContent>
         </Popover>

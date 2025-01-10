@@ -8,6 +8,7 @@ import {
 import { AuthError, SupabaseClient, User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { createSSRClient } from "../supabase/client";
+import { undefinedIfNull } from "../utils";
 
 /**
  * Determines if a route path that a user is trying to accesss is unprotected
@@ -46,6 +47,7 @@ export const handleUserSignout = async (): Promise<void> => {
     }
     redirect("/");
 };
+
 /**
  * Helper Sever Actions available to a server based component to assist with the process
  * of initial user authentication (ie. Login) and account creation
@@ -74,7 +76,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
 
         return {
             ok: error === null,
-            error,
+            error: undefinedIfNull(error),
         };
     };
 
@@ -116,8 +118,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
 
         //Return a successful registration response
         return {
-            ok: error === null,
-            error,
+            ok: true,
         };
     };
 
@@ -155,7 +156,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
 
         return {
             ok: signInError === null,
-            error: signInError,
+            error: undefinedIfNull(signInError),
         };
     };
 
@@ -200,6 +201,7 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
             email,
         });
 
+        // Deal with any errors that may have occurred during the OTP resend process
         if (error) {
             if (process.env.NODE_ENV === "development") console.error(error);
 
@@ -209,9 +211,9 @@ export const supabaseServerAuthHelper = async (): Promise<AuthClientHelper> => {
             };
         }
 
+        // Return a successful registration response
         return {
-            ok: error === null,
-            error,
+            ok: true,
         };
     };
 

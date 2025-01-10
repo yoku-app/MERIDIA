@@ -1,14 +1,6 @@
 import { UserProfile } from "@/lib/interfaces/user/user.interface";
+import { UserActions, UserState } from "@/states/user/user.state";
 import { createStore } from "zustand/vanilla";
-
-export type UserState = {
-    user: UserProfile | null;
-};
-
-export type UserActions = {
-    // todo: Implement User Store actions
-    setUser: (user: UserProfile | null) => void;
-};
 
 export type UserStore = UserState & UserActions;
 

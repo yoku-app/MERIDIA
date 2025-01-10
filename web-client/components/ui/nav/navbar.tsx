@@ -12,7 +12,6 @@ export const Navbar = async () => {
     // User session can be spoofed, but we are just using this
     // information to validate user information instead of information protection
     const { data, error } = await supabaseClient.auth.getSession();
-
     if (error || !data?.session) {
         return <UnauthenticatedNavbar />;
     }
