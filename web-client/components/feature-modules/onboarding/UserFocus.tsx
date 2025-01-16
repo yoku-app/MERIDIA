@@ -42,19 +42,19 @@ export const UserFocusForm: FC<FocusProps> = ({ control, className }) => {
                                 defaultValue={field.value}
                                 className="flex flex-col pt-4"
                             >
-                                <FormRadioItem value="creator">
+                                <FormRadioItem value="CREATOR">
                                     <Users className="w-6 h-6 mr-4" />
                                     <span>
                                         Create surveys and gather responses from
                                         target audience
                                     </span>
                                 </FormRadioItem>
-                                <FormRadioItem value="respondent">
+                                <FormRadioItem value="RESPONDENT">
                                     <Banknote className="w-6 h-6 mr-4" />
                                     Give out my opinions and be rewarded for my
                                     input
                                 </FormRadioItem>
-                                <FormRadioItem value="hybrid">
+                                <FormRadioItem value="HYBRID">
                                     <Route className="w=6 h-6 mr-4" />
                                     <span>
                                         A bit of everything this application has

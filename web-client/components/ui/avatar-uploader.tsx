@@ -42,7 +42,7 @@ export const AvatarUploader: FC<AvatarUploaderProps> = ({
         <section className="flex items-center mt-2">
             <div className="mt-2 relative group/picture">
                 <div className="w-20 h-20 relative rounded-xl overflow-hidden">
-                    {imageURL && (
+                    {imageURL ? (
                         <Image
                             alt="User Profile Picture"
                             className=""
@@ -52,6 +52,8 @@ export const AvatarUploader: FC<AvatarUploaderProps> = ({
                                 objectFit: "cover",
                             }}
                         />
+                    ) : (
+                        <div className="border-2 rounded-xl h-full w-full"></div>
                     )}
                 </div>
 

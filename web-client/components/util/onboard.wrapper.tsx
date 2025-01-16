@@ -1,8 +1,8 @@
 "use client";
 
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
-import { Onboard } from "../feature-modules/onboarding/Onboard";
 import { useUserStore } from "../provider/user.provider";
+import { Onboard } from "../feature-modules/onboarding/Onboard";
 
 /**
  * Centralised Wrapper Component to Handle all the Onboarding Process for a user once their

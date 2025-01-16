@@ -6,6 +6,7 @@ export type UserStore = UserState & UserActions;
 
 export const defaultUserInitState: UserState = {
     user: null,
+    token: null,
 };
 
 export const createUserStore = (
@@ -15,6 +16,8 @@ export const createUserStore = (
         ...initState,
         setUser: (user: UserProfile | null) =>
             set((state) => ({ ...state, user })),
+        setToken: (token: string | null) =>
+            set((state) => ({ ...state, token })),
         // todo: Implement User Related Store actions
     }));
 };

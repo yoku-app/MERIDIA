@@ -1,8 +1,9 @@
 import { useUserStore } from "@/components/provider/user.provider";
 import { Form } from "@/components/ui/form";
 import { updateUserProfile } from "@/controller/user.controller";
-import { ControllerResponse } from "@/lib/interfaces/shared/interface";
 import { UserProfile } from "@/lib/interfaces/user/user.interface";
+import { handlePublicFileUpload } from "@/lib/utils/storage/storage.util";
+import { createClient } from "@/lib/utils/supabase/client";
 import {
     CURRENT_DATE,
     MIN_DATE,
@@ -10,8 +11,10 @@ import {
     undefinedIfNull,
 } from "@/lib/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { Dispatch, FC, ReactElement, SetStateAction, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
+import { toast } from "sonner";
 import { isMobilePhone } from "validator";
 import { z } from "zod";
 import { MobileConfirmation } from "./MobileConfirmation";
@@ -43,7 +46,7 @@ const userOnboardDetailsSchema = z.object({
         .refine(isMobilePhone)
         .optional()
         .or(z.literal("")),
-    focus: z.enum(["respondent", "creator", "hybrid"], {
+    focus: z.enum(["RESPONDENT", "CREATOR", "HYBRID"], {
         required_error: "An application focus is required",
     }),
     avatarUrl: z.string().url().optional(),
@@ -91,6 +94,37 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
     const handleSubmission = async (values: UserOnboard) => {
         if (!user) return;
 
+        if (uploadedAvatar) {
+            const client: SupabaseClient = createClient();
+            // Upload Avatar to storage bucket and retrieve public access URL
+            const filePath = `profile-picture/${user.id}`;
+            const response = handlePublicFileUpload(
+                client,
+                uploadedAvatar,
+                "profile-picture",
+                filePath,
+                true
+            ).then((res) => {
+                if (res.error || !res.ok) {
+                    throw new Error(
+                        res.error?.message ?? "Failed to upload avatar"
+                    );
+                }
+
+                userOnboardForm.setValue("avatarUrl", res.data);
+            });
+
+            // Display Response Progress
+            toast.promise(response, {
+                loading: "Uploading Avatar...",
+                success: "Avatar Uploaded Successfully",
+                error(data) {
+                    return data.message;
+                },
+            });
+        }
+
+        // Update User Profile
         const updatedUser: UserProfile = {
             ...user,
             phone: undefinedIfNull(values.phone),
@@ -104,24 +138,30 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
         };
 
         // Update User Database Entry
-        const response: ControllerResponse<UserProfile> =
-            await updateUserProfile(updatedUser);
+        const response = updateUserProfile(updatedUser).then((res) => {
+            if (!responseSuccess(res) || !res?.data) {
+                throw new Error(res?.error ?? "Failed to update user profile");
+            }
 
-        // Deal with errors sent from server
-        if (!responseSuccess(response)) {
-            //todo: Modal/Toast Error Handler Functionality
-            return;
-        }
+            // Update User Store
+            // Purposely omit Onboarding Date update in the store
+            setUser({
+                ...res.data,
+                onboardingCompletion: null,
+            });
 
-        // Update User Store
-        // Purposely omit Onboarding Date update in the store
-        setUser({
-            ...response.data!,
-            onboardingCompletion: null,
+            setProgress(tabProgressMap["explore"]);
+            setTab("explore");
         });
 
-        setProgress(tabProgressMap["explore"]);
-        setTab("explore");
+        // Display Response Progress
+        toast.promise(response, {
+            loading: "Updating Profile...",
+            success: "Profile Updated Successfully",
+            error(data) {
+                return data.message;
+            },
+        });
     };
 
     const renderFormTab: Record<

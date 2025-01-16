@@ -4,6 +4,8 @@ export interface UserOnboardingCompletion {
     core?: Date;
 }
 
+export type ApplicationFocus = "RESPONDENT" | "CREATOR" | "HYBRID";
+
 export interface UserProfile {
     id: number;
     userId: string;
@@ -15,5 +17,5 @@ export interface UserProfile {
     updatedAt?: Date;
     dob?: Date;
     onboardingCompletion: UserOnboardingCompletion | null;
-    focus: "respondent" | "creator" | "hybrid";
+    focus: ApplicationFocus;
 }

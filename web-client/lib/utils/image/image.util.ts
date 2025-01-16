@@ -33,6 +33,7 @@ export const imageUploadHelper = ({ handleUpload }: UploadHelperCallbacks) => {
  */
 export const handleAvatarImageTransformation = async (
     image: File,
+    token: string | null,
     crop?: ImageCrop
 ): Promise<ControllerResponse<Blob>> => {
     // Define the transformation options
@@ -46,5 +47,5 @@ export const handleAvatarImageTransformation = async (
     };
 
     // Return the transformed image
-    return await transformImage(image, options);
+    return await transformImage(image, options, token);
 };

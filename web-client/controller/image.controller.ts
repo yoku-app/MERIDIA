@@ -16,9 +16,15 @@ import { ControllerResponse } from "@/lib/interfaces/shared/interface";
  */
 export const transformImage = async (
     image: File,
-    options: ImageTransformationOptions
+    options: ImageTransformationOptions,
+    token: string | null
 ): Promise<ControllerResponse<Blob>> => {
+    if (!token) {
+        return { status: 401, error: "Unauthorized" };
+    }
+
     // Instantiate Formdata Request to send all relevant data to the service
+    console.log(options);
     const formData: FormData = new FormData();
 
     // Add the image file to the form data
@@ -33,13 +39,13 @@ export const transformImage = async (
 
     // Send the request to the server
     const response: Response = await fetch(
-        process.env.NEXT_PUBLIC_IMAGE_API_URL + "image/transform",
+        process.env.NEXT_PUBLIC_API_URL + "image/transform",
         {
             method: "POST",
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
             body: formData,
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
         }
     );
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useUserStore } from "@/components/provider/user.provider";
 import { AvatarUploader } from "@/components/ui/avatar-uploader";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,13 +44,13 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
     setUploadedAvatar,
 }) => {
     const { control, trigger, setValue, getValues } = form;
-
+    const { token } = useUserStore((state) => state);
     const formDetails = useWatch({ control });
 
     const handleAvatarUpload = async (image: File): Promise<void> => {
         // Resize Uploaded Image and convert to WebP
         const response: ControllerResponse<Blob> =
-            await handleAvatarImageTransformation(image);
+            await handleAvatarImageTransformation(image, token);
 
         if (!responseSuccess(response) || !response.data) {
             // todo: Handle Error
@@ -133,7 +134,7 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
                     render={({ field }) => (
                         <FormItem className="mt-6">
                             <FormLabel className="font-semibold">
-                                Display Name
+                                Display Name * 
                             </FormLabel>
                             <FormControl>
                                 <Input {...field} placeholder="John Doe" />
@@ -148,7 +149,7 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
                         render={({ field }) => (
                             <FormItem className="flex flex-col w-full">
                                 <FormLabel className="font-semibold">
-                                    Date of Birth
+                                    Date of Birth * 
                                 </FormLabel>
                                 <FormControl>
                                     <FormDatePicker

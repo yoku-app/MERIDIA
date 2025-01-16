@@ -8,7 +8,6 @@ declare global {
             PORT: string;
             NEXT_PUBLIC_HOSTED_URL: string;
             NEXT_PUBLIC_API_URL: string;
-            NEXT_PUBLIC_IMAGE_API_URL: string;
             NEXT_PUBLIC_SUPABASE_URL: string;
             NEXT_PUBLIC_SUPABASE_ANON_KEY: string;
         }
