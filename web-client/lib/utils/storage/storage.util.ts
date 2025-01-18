@@ -37,6 +37,8 @@ export const handlePublicFileUpload = async (
         return { ok: false, error: error };
     }
 
+    console.log(data);
+
     const { data: urlData } = client.storage
         .from(bucket)
         .getPublicUrl(filePath);
@@ -50,4 +52,18 @@ export const handlePublicFileUpload = async (
     }
 
     return { ok: true, data: urlData.publicUrl };
+};
+
+/**
+ * String concatenation to format the URL path of a given file if url is being 
+ * created manually instead of using a Public URL Fetching function
+ * 
+ * @param {Bucket} bucket - The bucket the file is stored in
+ * @param filePath - Filename of the file and any associated file pathing 
+ * @returns URL of the file
+ */
+export const formatURLPath = (bucket: Bucket, filePath: string): string => {
+    return (
+        process.env.NEXT_PUBLIC_SUPABASE_STORAGE_URL + `/${bucket}/${filePath}`
+    );
 };
