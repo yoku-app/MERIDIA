@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/sheet";
 import { ControllerResponse } from "@/lib/interfaces/shared/interface";
 import { handleAvatarImageTransformation } from "@/lib/utils/image/image.util";
+import { createClient } from "@/lib/utils/supabase/client";
+import {
+    assignPhoneToUser,
+    sendPhoneOTP,
+} from "@/lib/utils/supabase/supabase.client.util";
 import { CURRENT_DATE, MIN_DATE, responseSuccess } from "@/lib/utils/utils";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { ArrowRight } from "lucide-react";
 import { Dispatch, FC, SetStateAction } from "react";
 import { useWatch } from "react-hook-form";
@@ -35,6 +41,8 @@ interface UserDetailsFormProps extends OnboardFormTabProps {
         name: keyof UserOnboard,
         value: UserOnboard[keyof UserOnboard]
     ) => void;
+    confirmationSentTo: string | null;
+    setConfirmationSentTo: Dispatch<SetStateAction<string | null>>;
 }
 
 const UserDetailsForm: FC<UserDetailsFormProps> = ({
@@ -42,8 +50,10 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
     handleTabChange,
     onSubmit,
     setUploadedAvatar,
+    confirmationSentTo,
+    setConfirmationSentTo,
 }) => {
-    const { control, trigger, setValue, getValues } = form;
+    const { control, trigger, setValue } = form;
     const { token } = useUserStore((state) => state);
     const formDetails = useWatch({ control });
 
@@ -68,12 +78,12 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
         setValue("avatarUrl", avatarURL);
     };
 
-    const handleAvatarRemoval = () => {
+    const handleAvatarRemoval = (): void => {
         setUploadedAvatar(null);
         setValue("avatarUrl", undefined);
     };
 
-    const handleNext = async () => {
+    const handleNext = async (): Promise<void> => {
         // Perform Validation on Subset of Form Responses
         const validationResponse = await trigger([
             "displayName",
@@ -88,12 +98,55 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
         }
 
         // If Phone Field is not provided, form is ready to submit
-        if (!getValues("phone")) {
+        if (!formDetails.phone || !formDetails.phone.length) {
             onSubmit();
             return;
         }
 
         // If phone field is provided, phone confirmation is required before onboarding is complete
+        await handlePhoneConfirmation(formDetails.phone);
+    };
+
+    const handlePhoneConfirmation = async (phone: string): Promise<void> => {
+        const phoneLoadingToast = toast.loading("Checking phone number...");
+
+        // Phone number has already been added to account, if token has expired already
+        // force into manual refresh on next page
+        if (phone === confirmationSentTo) {
+            toast.dismiss(phoneLoadingToast);
+            toast.info(
+                "We have alread sent an OTP to this number, please check your messages"
+            );
+            handleTabChange("phone");
+            return;
+        }
+
+        //
+        const client: SupabaseClient = createClient();
+
+        // Establish if the phone number can be assigned to the user
+        const { error: assignationError } = await assignPhoneToUser(
+            client,
+            phone
+        );
+        if (assignationError) {
+            toast.dismiss(phoneLoadingToast);
+            toast.error(assignationError.message);
+            form.setError("phone", { message: assignationError.message });
+            return;
+        }
+
+        // Phone number has been successfully assigned to the user
+        const { error: OTPError } = await sendPhoneOTP(client, phone);
+        if (OTPError) {
+            toast.dismiss(phoneLoadingToast);
+            toast.error(OTPError.message);
+            form.setError("phone", { message: OTPError.message });
+            return;
+        }
+
+        toast.dismiss(phoneLoadingToast);
+        setConfirmationSentTo(phone);
         handleTabChange("phone");
     };
 
@@ -134,7 +187,7 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
                     render={({ field }) => (
                         <FormItem className="mt-6">
                             <FormLabel className="font-semibold">
-                                Display Name * 
+                                Display Name *
                             </FormLabel>
                             <FormControl>
                                 <Input {...field} placeholder="John Doe" />
@@ -149,7 +202,7 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
                         render={({ field }) => (
                             <FormItem className="flex flex-col w-full">
                                 <FormLabel className="font-semibold">
-                                    Date of Birth * 
+                                    Date of Birth *
                                 </FormLabel>
                                 <FormControl>
                                     <FormDatePicker

@@ -9,28 +9,19 @@ import {
     AuthenticationProps,
     RegistrationConfirmation,
 } from "@/lib/interfaces/auth/auth.interfaces";
+import { FormOTP, OTPFormSchema } from "@/lib/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { Control, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Registration } from "./Register";
 
 interface RegisterConfirmationProps extends AuthenticationProps {
     visibilityCallback: (visible: boolean) => void;
     formControl: Control<Registration>;
 }
-
-const userRegisterDetailsSchema = z.object({
-    otp: z
-        .string()
-        .length(6, "OTP must be 6 characters long")
-        .regex(/^\d+$/, "Must contain only digits"),
-});
-
-type UserRegistrationDetails = z.infer<typeof userRegisterDetailsSchema>;
 
 const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
     formControl,
@@ -40,8 +31,8 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
     const { confirmEmailSignupWithOTP, handleResendOTP } = callbacks;
     const [otpVerifyError, setOtpVerifyError] = useState<boolean>(false);
     const formDetails = useWatch({ control: formControl });
-    const userDetailsForm = useForm<UserRegistrationDetails>({
-        resolver: zodResolver(userRegisterDetailsSchema),
+    const userDetailsForm = useForm<FormOTP>({
+        resolver: zodResolver(OTPFormSchema),
         defaultValues: {
             otp: "",
         },
@@ -49,32 +40,28 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
 
     const router = useRouter();
 
-    const handleCancel = () => {
+    const handleCancel = (): void => {
         userDetailsForm.reset();
         visibilityCallback(false);
     };
 
-    const handleTokenResend = async () => {
+    const handleTokenResend = async (): Promise<void> => {
         if (!formDetails.email) return;
 
-        const response = handleResendOTP(formDetails.email).then((res) => {
-            if (!res.ok) {
-                throw new Error(res?.error?.message ?? "Failed to resend OTP");
-            }
-        });
+        const resendToast = toast.loading("Resending OTP...");
 
-        toast.promise(response, {
-            loading: "Resending OTP...",
-            success: () => {
-                return "OTP Resent Successfully";
-            },
-            error: (error) => {
-                return error.message;
-            },
-        });
+        const response = await handleResendOTP(formDetails.email);
+        toast.dismiss(resendToast);
+
+        if (!response.ok || response.error) {
+            toast.error(response.error?.message ?? "Failed to resend OTP");
+            return;
+        }
+
+        toast.success("OTP Sent Successfully");
     };
 
-    const handleSubmission = async (values: UserRegistrationDetails) => {
+    const handleSubmission = async (values: FormOTP): Promise<void> => {
         if (!formDetails.email || !formDetails.password) return;
 
         setOtpVerifyError(false);

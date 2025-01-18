@@ -2,7 +2,10 @@ import { useUserStore } from "@/components/provider/user.provider";
 import { Form } from "@/components/ui/form";
 import { updateUserProfile } from "@/controller/user.controller";
 import { UserProfile } from "@/lib/interfaces/user/user.interface";
-import { handlePublicFileUpload } from "@/lib/utils/storage/storage.util";
+import {
+    formatURLPath,
+    handlePublicFileUpload,
+} from "@/lib/utils/storage/storage.util";
 import { createClient } from "@/lib/utils/supabase/client";
 import {
     CURRENT_DATE,
@@ -27,7 +30,7 @@ export type FormTab = "user" | "phone";
 // Main user focus (ie. Why are they using this app)
 export type UserFocus = "respondent" | "creator" | "hybrid";
 
-type OnboardingTab = FormTab | "explore";
+export type OnboardingTab = FormTab | "explore";
 
 const userOnboardDetailsSchema = z.object({
     displayName: z
@@ -65,9 +68,10 @@ interface OnboardFormProps {
 }
 
 export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
-    const { user, setUser } = useUserStore((state) => state);
+    const { user, token, setUser } = useUserStore((state) => state);
     const [tab, setTab] = useState<OnboardingTab>("user");
     const [uploadedAvatar, setUploadedAvatar] = useState<Blob | null>(null);
+    const [confirmSentTo, setConfirmSentTo] = useState<string | null>(null);
 
     const tabProgressMap: Record<OnboardingTab, number> = {
         user: 10,
@@ -95,33 +99,22 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
         if (!user) return;
 
         if (uploadedAvatar) {
+            const loadingToast = toast.loading("Uploading Avatar...");
             const client: SupabaseClient = createClient();
-            // Upload Avatar to storage bucket and retrieve public access URL
-            const filePath = `profile-picture/${user.id}`;
-            const response = handlePublicFileUpload(
+            const response = await handlePublicFileUpload(
                 client,
-                uploadedAvatar,
+                uploadedAvatar!,
                 "profile-picture",
-                filePath,
+                user!.userId,
                 true
-            ).then((res) => {
-                if (res.error || !res.ok) {
-                    throw new Error(
-                        res.error?.message ?? "Failed to upload avatar"
-                    );
-                }
+            );
 
-                userOnboardForm.setValue("avatarUrl", res.data);
-            });
+            toast.dismiss(loadingToast);
 
-            // Display Response Progress
-            toast.promise(response, {
-                loading: "Uploading Avatar...",
-                success: "Avatar Uploaded Successfully",
-                error(data) {
-                    return data.message;
-                },
-            });
+            if (!response.ok) {
+                toast.error("Failed to upload Avatar");
+                return;
+            }
         }
 
         // Update User Profile
@@ -131,6 +124,9 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
             displayName: values.displayName,
             dob: values.dob,
             focus: values.focus,
+            avatarUrl: uploadedAvatar
+                ? formatURLPath("profile-picture", user.userId)
+                : values.avatarUrl,
             onboardingCompletion: {
                 ...user.onboardingCompletion,
                 core: new Date(),
@@ -138,30 +134,26 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
         };
 
         // Update User Database Entry
-        const response = updateUserProfile(updatedUser).then((res) => {
-            if (!responseSuccess(res) || !res?.data) {
-                throw new Error(res?.error ?? "Failed to update user profile");
-            }
+        const updateProfileToast = toast.loading("Updating Profile...");
+        const response = await updateUserProfile(updatedUser, token);
+        toast.dismiss(updateProfileToast);
 
-            // Update User Store
-            // Purposely omit Onboarding Date update in the store
-            setUser({
-                ...res.data,
-                onboardingCompletion: null,
-            });
+        if (!responseSuccess(response) || !response.data) {
+            toast.error("Failed to update Profile");
+            return;
+        }
 
-            setProgress(tabProgressMap["explore"]);
-            setTab("explore");
+        // Update User Store
+        // Purposely omit Onboarding Date update in the store
+        setUser({
+            ...response.data,
+            onboardingCompletion: null,
         });
 
-        // Display Response Progress
-        toast.promise(response, {
-            loading: "Updating Profile...",
-            success: "Profile Updated Successfully",
-            error(data) {
-                return data.message;
-            },
-        });
+        toast.success("Profile Updated Successfully");
+
+        setProgress(tabProgressMap["explore"]);
+        setTab("explore");
     };
 
     const renderFormTab: Record<
@@ -173,6 +165,8 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
                 {...props}
                 setUploadedAvatar={setUploadedAvatar}
                 setValue={userOnboardForm.setValue}
+                confirmationSentTo={confirmSentTo}
+                setConfirmationSentTo={setConfirmSentTo}
             />
         ),
         phone: (props: OnboardFormTabProps) => (
