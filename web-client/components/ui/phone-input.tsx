@@ -1,5 +1,5 @@
 import { CheckIcon, ChevronsUpDown } from "lucide-react";
-import * as React from "react";
+
 import * as RPNInput from "react-phone-number-input";
 import flags from "react-phone-number-input/flags";
 
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils/utils";
+import { forwardRef, useState } from "react";
 
 type PhoneInputProps = Omit<
     React.ComponentProps<"input">,
@@ -29,43 +30,40 @@ type PhoneInputProps = Omit<
         onChange?: (value: RPNInput.Value) => void;
     };
 
-const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
-    React.forwardRef<
-        React.ElementRef<typeof RPNInput.default>,
-        PhoneInputProps
-    >(({ className, onChange, ...props }, ref) => {
-        return (
-            <RPNInput.default
-                ref={ref}
-                className={cn("flex", className)}
-                flagComponent={FlagComponent}
-                countrySelectComponent={CountrySelect}
-                inputComponent={InputComponent}
-                smartCaret={false}
-                /**
-                 * Handles the onChange event.
-                 *
-                 * react-phone-number-input might trigger the onChange event as undefined
-                 * when a valid phone number is not entered. To prevent this,
-                 * the value is coerced to an empty string.
-                 *
-                 * @param {E164Number | undefined} value - The entered value
-                 */
-                onChange={(value) =>
-                    onChange?.(value || ("" as RPNInput.Value))
-                }
-                {...props}
-            />
-        );
-    });
+const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> = forwardRef<
+    React.ElementRef<typeof RPNInput.default>,
+    PhoneInputProps
+>(({ className, onChange, ...props }, ref) => {
+    return (
+        <RPNInput.default
+            ref={ref}
+            className={cn("flex h-10", className)}
+            flagComponent={FlagComponent}
+            countrySelectComponent={CountrySelect}
+            inputComponent={InputComponent}
+            smartCaret={false}
+            /**
+             * Handles the onChange event.
+             *
+             * react-phone-number-input might trigger the onChange event as undefined
+             * when a valid phone number is not entered. To prevent this,
+             * the value is coerced to an empty string.
+             *
+             * @param {E164Number | undefined} value - The entered value
+             */
+            onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+            {...props}
+        />
+    );
+});
 PhoneInput.displayName = "PhoneInput";
 
-const InputComponent = React.forwardRef<
+const InputComponent = forwardRef<
     HTMLInputElement,
     React.ComponentProps<"input">
 >(({ className, ...props }, ref) => (
     <Input
-        className={cn("rounded-e-lg rounded-s-none", className)}
+        className={cn("rounded-e-md h-full py-1 rounded-s-none", className)}
         {...props}
         ref={ref}
     />
@@ -87,13 +85,20 @@ const CountrySelect = ({
     options: countryList,
     onChange,
 }: CountrySelectProps) => {
+    const [open, setOpen] = useState(false);
+
+    const handleCountrySelect = (country: RPNInput.Country) => {
+        onChange(country);
+        setOpen(false);
+    };
+
     return (
-        <Popover modal={true}>
+        <Popover modal={true} open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
                     type="button"
                     variant="outline"
-                    className="flex gap-1 rounded-e-none rounded-s-lg border-r-0 px-3 focus:z-10"
+                    className="flex gap-1 py-1 h-full rounded-e-none rounded-s-md border-r-0 px-3 focus:z-10"
                     disabled={disabled}
                 >
                     <FlagComponent
@@ -125,7 +130,7 @@ const CountrySelect = ({
                                             country={value}
                                             countryName={label}
                                             selectedCountry={selectedCountry}
-                                            onChange={onChange}
+                                            onChange={handleCountrySelect}
                                         />
                                     ) : null
                                 )}
