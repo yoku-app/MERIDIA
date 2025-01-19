@@ -1,7 +1,6 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     Select,
     SelectContent,
@@ -13,6 +12,7 @@ import { cn } from "@/lib/utils/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
 import { DayPicker, DropdownProps } from "react-day-picker";
+import { ScrollArea } from "./scroll-area";
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
@@ -93,7 +93,10 @@ function Calendar({
                                 </SelectValue>
                             </SelectTrigger>
                             <SelectContent position="popper">
-                                <ScrollArea className="h-80">
+                                <ScrollArea
+                                    onWheel={(e) => e.stopPropagation()}
+                                    className="h-80"
+                                >
                                     {options.map((option, id: number) => (
                                         <SelectItem
                                             key={`${option.props.value}-${id}`}

@@ -19,7 +19,7 @@ import { useUserStore } from "../provider/user.provider";
  */
 const AuthenticationWrapper: FCWC<Propless> = ({ children }) => {
     const client: SupabaseClient = createClient();
-    const { user, setUser } = useUserStore((state) => state);
+    const { user, setUser, setToken } = useUserStore((state) => state);
 
     client.auth.onAuthStateChange(async (event, session) => {
         // If no user is currently authenticated, no action is performed
@@ -28,6 +28,7 @@ const AuthenticationWrapper: FCWC<Propless> = ({ children }) => {
             if (!user) return;
 
             setUser(null);
+            setToken(null);
             return;
         }
 
@@ -45,6 +46,8 @@ const AuthenticationWrapper: FCWC<Propless> = ({ children }) => {
 
         // Set the User's profile in the store
         setUser(response.data);
+        // Also store the current session token for client side access
+        setToken(session.access_token);
     });
 
     return children;

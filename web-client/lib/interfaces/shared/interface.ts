@@ -14,8 +14,17 @@ export interface ClassNameProps {
     className?: string;
 }
 
-export interface ControllerResponse<T>{
+export interface SupabaseClientResponse<T extends Error, V = unknown> {
+    ok: boolean;
+    data?: V;
+    error?: T;
+}
+
+export interface ControllerResponse<T> {
     status: number;
     data?: T;
     error?: string;
 }
+
+export type HorizontalPosition = "left" | "center" | "right";
+export type VerticalPosition = "top" | "center" | "bottom";

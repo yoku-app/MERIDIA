@@ -1,56 +1,57 @@
-"use client";
-
 import { FormFieldProps } from "@/lib/interfaces/form/forms.interfaces";
-import { ClassNameProps } from "@/lib/interfaces/shared/interface";
-import { cn } from "@/lib/utils/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { FC } from "react";
-import { Button } from "../button";
-import { Calendar } from "../calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "../popover";
+import { DateTimePicker } from "../date-picker/date-picker";
+import { DateTimeInput } from "../date-picker/date-picker-input";
+import { FormControl, FormItem, FormLabel, FormMessage } from "../form";
 
-interface FormDatePicker extends ClassNameProps {
-    field: FormFieldProps<Date | undefined>;
-    minDate?: Date;
+interface DatePickerProps {
+    title?: string;
     maxDate?: Date;
+    minDate?: Date;
+    field: FormFieldProps<Date | undefined>;
+    required?: boolean;
+    displayErrorMessage?: boolean;
+    exitOnClick?: boolean;
 }
 
-export const FormDatePicker: FC<FormDatePicker> = ({
+export const FormDatePicker: FC<DatePickerProps> = ({
     field,
-    className,
-    minDate,
+    title,
+    required,
     maxDate,
+    minDate,
+    displayErrorMessage = true,
+    exitOnClick = false,
 }) => {
     return (
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    className={cn(
-                        "w-[240px] justify-start text-left font-normal",
-                        !field.value && "text-muted-foreground",
-                        className
+        <FormItem className="flex flex-col w-full">
+            {title && (
+                <FormLabel className="font-semibold">
+                    Date of Birth {required && "*"}
+                </FormLabel>
+            )}
+            <FormControl>
+                <DateTimePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    modal={true}
+                    hideTime
+                    min={minDate}
+                    max={maxDate}
+                    exitOnClick={exitOnClick}
+                    clearable
+                    renderTrigger={({ open, value, setOpen }) => (
+                        <DateTimeInput
+                            value={value}
+                            onChange={(x) => !open && field.onChange(x)}
+                            format="dd/MM/yyyy"
+                            disabled={open}
+                            onCalendarClick={() => setOpen(!open)}
+                        />
                     )}
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {field.value ? (
-                        format(field.value, "PPP")
-                    ) : (
-                        <span>Pick a date</span>
-                    )}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className=" w-auto p-0">
-                <Calendar
-                    mode="single"
-                    captionLayout="dropdown-buttons"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    fromYear={minDate?.getFullYear() ?? 1960}
-                    toYear={maxDate?.getFullYear() ?? 2030}
                 />
-            </PopoverContent>
-        </Popover>
+            </FormControl>
+            {displayErrorMessage && <FormMessage className="font-semibold" />}
+        </FormItem>
     );
 };

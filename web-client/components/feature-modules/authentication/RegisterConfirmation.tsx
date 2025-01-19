@@ -9,42 +9,19 @@ import {
     AuthenticationProps,
     RegistrationConfirmation,
 } from "@/lib/interfaces/auth/auth.interfaces";
+import { FormOTP, OTPFormSchema } from "@/lib/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { Control, useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Registration } from "./Register";
 
 interface RegisterConfirmationProps extends AuthenticationProps {
     visibilityCallback: (visible: boolean) => void;
     formControl: Control<Registration>;
 }
-
-//todo: Move Commented out code into Onboarding Component for Shared Onboarding Process with Social Auth
-
-// const MIN_DATE = new Date("1900-01-01");
-// const MAX_DATE = new Date();
-
-const userRegisterDetailsSchema = z.object({
-    otp: z
-        .string()
-        .length(6, "OTP must be 6 characters long")
-        .regex(/^\d+$/, "Must contain only digits"),
-    // firstName: z.string().nonempty("First Name is required"),
-    // lastName: z.string().nonempty("Last Name is required"),
-    // dob: z
-    //     .date({
-    //         required_error: "Date of Birth is required",
-    //         invalid_type_error: "Invalid Date of Birth",
-    //     })
-    //     .max(MAX_DATE, "Googoo Gaagaa??")
-    //     .min(MIN_DATE, "Bro??"),
-});
-
-type UserRegistrationDetails = z.infer<typeof userRegisterDetailsSchema>;
 
 const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
     formControl,
@@ -54,44 +31,37 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
     const { confirmEmailSignupWithOTP, handleResendOTP } = callbacks;
     const [otpVerifyError, setOtpVerifyError] = useState<boolean>(false);
     const formDetails = useWatch({ control: formControl });
-    const userDetailsForm = useForm<UserRegistrationDetails>({
-        resolver: zodResolver(userRegisterDetailsSchema),
+    const userDetailsForm = useForm<FormOTP>({
+        resolver: zodResolver(OTPFormSchema),
         defaultValues: {
             otp: "",
-            // firstName: "",
-            // lastName: "",
-            // dob: undefined,
         },
     });
 
     const router = useRouter();
 
-    const handleCancel = () => {
+    const handleCancel = (): void => {
         userDetailsForm.reset();
         visibilityCallback(false);
     };
 
-    const handleTokenResend = async () => {
+    const handleTokenResend = async (): Promise<void> => {
         if (!formDetails.email) return;
 
-        const response = handleResendOTP(formDetails.email).then((res) => {
-            if (!res.ok) {
-                throw new Error(res?.error?.message ?? "Failed to resend OTP");
-            }
-        });
+        const resendToast = toast.loading("Resending OTP...");
 
-        toast.promise(response, {
-            loading: "Resending OTP...",
-            success: () => {
-                return "OTP Resent Successfully";
-            },
-            error: (error) => {
-                return error.message;
-            },
-        });
+        const response = await handleResendOTP(formDetails.email);
+        toast.dismiss(resendToast);
+
+        if (!response.ok || response.error) {
+            toast.error(response.error?.message ?? "Failed to resend OTP");
+            return;
+        }
+
+        toast.success("OTP Sent Successfully");
     };
 
-    const handleSubmission = async (values: UserRegistrationDetails) => {
+    const handleSubmission = async (values: FormOTP): Promise<void> => {
         if (!formDetails.email || !formDetails.password) return;
 
         setOtpVerifyError(false);
@@ -143,65 +113,6 @@ const RegisterConfirmation: FC<RegisterConfirmationProps> = ({
                             handleSubmission
                         )}
                     >
-                        {/* <FormField
-                            control={userDetailsForm.control}
-                            name="firstName"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="mt-4 font-semibold">
-                                        First Name
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="w-full my-2"
-                                            {...field}
-                                            placeholder="John"
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="font-semibold" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={userDetailsForm.control}
-                            name="lastName"
-                            render={({ field }) => (
-                                <FormItem className="mt-2">
-                                    <FormLabel className="mt-4 font-semibold">
-                                        Last Name
-                                    </FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            className="w-full my-2"
-                                            {...field}
-                                            placeholder="Doe"
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="font-semibold" />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={userDetailsForm.control}
-                            name="dob"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-col">
-                                    <FormLabel className="mt-4 font-semibold">
-                                        Date of Birth
-                                    </FormLabel>
-                                    <FormControl>
-                                        <FormDatePicker
-                                            className="w-full"
-                                            field={field}
-                                            minDate={MIN_DATE}
-                                            maxDate={MAX_DATE}
-                                        />
-                                    </FormControl>
-                                    <FormMessage className="font-semibold" />
-                                </FormItem>
-                            )}
-                        /> */}
-
                         <FormField
                             control={userDetailsForm.control}
                             name="otp"
