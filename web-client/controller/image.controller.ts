@@ -24,7 +24,6 @@ export const transformImage = async (
     }
 
     // Instantiate Formdata Request to send all relevant data to the service
-    console.log(options);
     const formData: FormData = new FormData();
 
     // Add the image file to the form data

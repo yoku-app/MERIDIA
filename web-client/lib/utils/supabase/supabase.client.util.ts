@@ -2,6 +2,7 @@
 
 import { AuthResponse } from "@/lib/interfaces/auth/auth.interfaces";
 import { MobileOtpType, SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "./client";
 
 /**
  * Provides post registration phone verification abilities
@@ -13,10 +14,10 @@ import { MobileOtpType, SupabaseClient } from "@supabase/supabase-js";
  *
  */
 export const assignPhoneToUser = async (
-    client: SupabaseClient,
     phone: string
 ): Promise<AuthResponse> => {
     // Update the user object with their specified phone number
+    const client: SupabaseClient = createClient();
     const { error: updateError } = await client.auth.updateUser({ phone });
 
     if (updateError) {
@@ -40,12 +41,12 @@ export const assignPhoneToUser = async (
  * @param {String} phone -> The phone number being verified
  */
 export const sendPhoneOTP = async (
-    client: SupabaseClient,
     phone: string,
     type: MobileOtpType = "phone_change"
 ): Promise<AuthResponse> => {
+    const client: SupabaseClient = createClient();
     // Force trigger the OTP to be sent to the user's phone number
-    const { error: sendError } = await client.auth.resend({
+    const { error: sendError, data } = await client.auth.resend({
         phone,
         type,
     });
@@ -70,11 +71,11 @@ export const sendPhoneOTP = async (
  * @param {String} otp - The OTP provided by the user
  */
 export const verifyPhoneOTP = async (
-    client: SupabaseClient,
     phone: string,
     otp: string,
     type: MobileOtpType = "phone_change"
 ): Promise<AuthResponse> => {
+    const client: SupabaseClient = createClient();
     const { error } = await client.auth.verifyOtp({
         phone,
         token: otp,

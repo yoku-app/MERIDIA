@@ -3,6 +3,7 @@
 import { useUserStore } from "@/components/provider/user.provider";
 import { AvatarUploader } from "@/components/ui/avatar-uploader";
 import { Button } from "@/components/ui/button";
+
 import {
     FormControl,
     FormDescription,
@@ -21,13 +22,8 @@ import {
 } from "@/components/ui/sheet";
 import { ControllerResponse } from "@/lib/interfaces/shared/interface";
 import { handleAvatarImageTransformation } from "@/lib/utils/image/image.util";
-import { createClient } from "@/lib/utils/supabase/client";
-import {
-    assignPhoneToUser,
-    sendPhoneOTP,
-} from "@/lib/utils/supabase/supabase.client.util";
-import { CURRENT_DATE, MIN_DATE, responseSuccess } from "@/lib/utils/utils";
-import { SupabaseClient } from "@supabase/supabase-js";
+import { assignPhoneToUser } from "@/lib/utils/supabase/supabase.client.util";
+import { responseSuccess } from "@/lib/utils/utils";
 import { ArrowRight } from "lucide-react";
 import { Dispatch, FC, SetStateAction } from "react";
 import { useWatch } from "react-hook-form";
@@ -122,13 +118,10 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
         }
 
         //
-        const client: SupabaseClient = createClient();
 
         // Establish if the phone number can be assigned to the user
-        const { error: assignationError } = await assignPhoneToUser(
-            client,
-            phone
-        );
+        const { error: assignationError } = await assignPhoneToUser(phone);
+
         if (assignationError) {
             toast.dismiss(phoneLoadingToast);
             toast.error(assignationError.message);
@@ -136,14 +129,12 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
             return;
         }
 
-        // Phone number has been successfully assigned to the user
-        const { error: OTPError } = await sendPhoneOTP(client, phone);
-        if (OTPError) {
-            toast.dismiss(phoneLoadingToast);
-            toast.error(OTPError.message);
-            form.setError("phone", { message: OTPError.message });
-            return;
-        }
+        // if (OTPError) {
+        //     toast.dismiss(phoneLoadingToast);
+        //     toast.error(OTPError.message);
+        //     form.setError("phone", { message: OTPError.message });
+        //     return;
+        // }
 
         toast.dismiss(phoneLoadingToast);
         setConfirmationSentTo(phone);
@@ -200,20 +191,12 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
                         control={control}
                         name="dob"
                         render={({ field }) => (
-                            <FormItem className="flex flex-col w-full">
-                                <FormLabel className="font-semibold">
-                                    Date of Birth *
-                                </FormLabel>
-                                <FormControl>
-                                    <FormDatePicker
-                                        className="w-full"
-                                        field={field}
-                                        minDate={MIN_DATE}
-                                        maxDate={CURRENT_DATE}
-                                    />
-                                </FormControl>
-                                <FormMessage className="font-semibold" />
-                            </FormItem>
+                            <FormDatePicker
+                                field={field}
+                                title="Date of Birth"
+                                required
+                                exitOnClick={true}
+                            />
                         )}
                     />
                     <FormField
@@ -224,8 +207,13 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
                                 <FormLabel className="font-semibold">
                                     Phone Number
                                 </FormLabel>
-                                <PhoneInput {...field} />
-                                <FormControl></FormControl>
+                                <FormControl>
+                                    <PhoneInput
+                                        {...field}
+                                        defaultCountry="AU"
+                                    />
+                                </FormControl>
+
                                 <FormMessage className="font-semibold" />
                             </FormItem>
                         )}

@@ -10,6 +10,7 @@ import { createClient } from "@/lib/utils/supabase/client";
 import {
     CURRENT_DATE,
     MIN_DATE,
+    OTPFormSchema,
     responseSuccess,
     undefinedIfNull,
 } from "@/lib/utils/utils";
@@ -53,6 +54,9 @@ const userOnboardDetailsSchema = z.object({
         required_error: "An application focus is required",
     }),
     avatarUrl: z.string().url().optional(),
+
+    // OTP is only required if phone number is provided
+    otp: OTPFormSchema.shape.otp.or(z.literal("")),
 });
 
 export interface OnboardFormTabProps {
@@ -87,6 +91,7 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
             phone: user?.phone || undefined,
             focus: undefined,
             avatarUrl: user?.avatarUrl,
+            otp: "",
         },
     });
 
