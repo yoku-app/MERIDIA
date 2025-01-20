@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronsUpDown, Plus } from "lucide-react";
-import * as React from "react";
 
 import {
     DropdownMenu,
@@ -18,18 +17,32 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
+import Image from "next/image";
+import { useState } from "react";
 
-export function TeamSwitcher({
-    teams,
-}: {
-    teams: {
-        name: string;
-        logo: React.ElementType;
-        plan: string;
-    }[];
-}) {
+interface ItemBrief {
+    id: string;
+    name: string;
+    avatarURL: string;
+}
+
+export interface ItemSwitcher<T extends ItemBrief> {
+    defaultSelection: T;
+    items: T[];
+    title: string;
+    renderItemDisplay: (item: T) => JSX.Element;
+}
+
+export const ItemSwitcher = <T extends ItemBrief>({
+    defaultSelection,
+    items,
+    title,
+    renderItemDisplay,
+}: ItemSwitcher<T>) => {
     const { isMobile } = useSidebar();
-    const [activeTeam, setActiveTeam] = React.useState(teams[0]);
+    const [activeItem, setActiveItem] = useState(
+        items.find((item) => item.id === defaultSelection.id) ?? items[0]
+    );
 
     return (
         <SidebarMenu>
@@ -40,17 +53,7 @@ export function TeamSwitcher({
                             size="lg"
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                <activeTeam.logo className="size-4" />
-                            </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-semibold">
-                                    {activeTeam.name}
-                                </span>
-                                <span className="truncate text-xs">
-                                    {activeTeam.plan}
-                                </span>
-                            </div>
+                            {renderItemDisplay(activeItem)}
                             <ChevronsUpDown className="ml-auto" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
@@ -61,18 +64,24 @@ export function TeamSwitcher({
                         sideOffset={4}
                     >
                         <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            Teams
+                            {title}s
                         </DropdownMenuLabel>
-                        {teams.map((team, index) => (
+                        {items.map((item, index) => (
                             <DropdownMenuItem
-                                key={team.name}
-                                onClick={() => setActiveTeam(team)}
+                                key={item.name}
+                                onClick={() => setActiveItem(item)}
                                 className="gap-2 p-2"
                             >
                                 <div className="flex size-6 items-center justify-center rounded-sm border">
-                                    <team.logo className="size-4 shrink-0" />
+                                    <Image
+                                        src={item.avatarURL}
+                                        alt={item.name}
+                                        width={24}
+                                        height={24}
+                                        className="rounded-sm"
+                                    />
                                 </div>
-                                {team.name}
+                                {item.name}
                                 <DropdownMenuShortcut>
                                     ⌘{index + 1}
                                 </DropdownMenuShortcut>
@@ -84,7 +93,7 @@ export function TeamSwitcher({
                                 <Plus className="size-4" />
                             </div>
                             <div className="font-medium text-muted-foreground">
-                                Add team
+                                Add {title}
                             </div>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -92,4 +101,4 @@ export function TeamSwitcher({
             </SidebarMenuItem>
         </SidebarMenu>
     );
-}
+};

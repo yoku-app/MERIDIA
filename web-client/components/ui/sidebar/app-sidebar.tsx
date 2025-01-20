@@ -2,8 +2,6 @@
 
 import {
     AudioWaveform,
-    BookOpen,
-    Bot,
     Command,
     Frame,
     GalleryVerticalEnd,
@@ -50,17 +48,26 @@ const data = {
     ],
     navMain: [
         {
-            title: "Playground",
-            url: "#",
+            title: "Your Organisations",
+            url: "#yes",
             icon: SquareTerminal,
             isActive: true,
             items: [
                 {
-                    title: "History",
-                    url: "#",
+                    title: "Organisations",
+                    url: "organisation/",
                 },
                 {
-                    title: "Starred",
+                    title: "People",
+                    url: "organisation/people",
+                },
+                {
+                    title: "Roles",
+                    url: "organisation/roles",
+                },
+
+                {
+                    title: "Logs",
                     url: "#",
                 },
                 {
@@ -70,43 +77,25 @@ const data = {
             ],
         },
         {
-            title: "Models",
+            title: "Your Created Surveys",
             url: "#",
-            icon: Bot,
+            icon: SquareTerminal,
+            isActive: true,
             items: [
                 {
-                    title: "Genesis",
+                    title: "Dashboard",
                     url: "#",
                 },
                 {
-                    title: "Explorer",
+                    title: "Insights",
                     url: "#",
                 },
                 {
-                    title: "Quantum",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Documentation",
-            url: "#",
-            icon: BookOpen,
-            items: [
-                {
-                    title: "Introduction",
+                    title: "Logs",
                     url: "#",
                 },
                 {
-                    title: "Get Started",
-                    url: "#",
-                },
-                {
-                    title: "Tutorials",
-                    url: "#",
-                },
-                {
-                    title: "Changelog",
+                    title: "Settings",
                     url: "#",
                 },
             ],
