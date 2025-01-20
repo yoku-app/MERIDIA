@@ -1,5 +1,7 @@
 import { ThemeProvider } from "@/components/provider/theme.provider";
 import { Navbar } from "@/components/ui/nav/navbar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/ui/sidebar/app-sidebar";
 import AuthenticationWrapper from "@/components/util/auth.wrapper";
 import { OnboardWrapper } from "@/components/util/onboard.wrapper";
 import StoreProviderWrapper from "@/components/util/store.wrapper";
@@ -34,12 +36,17 @@ const RootLayout: FCWC<Propless> = ({ children }) => {
                     disableTransitionOnChange
                 >
                     <StoreProviderWrapper>
-                        <AuthenticationWrapper>
-                            <OnboardWrapper>
-                                <Navbar />
-                                {children}
-                            </OnboardWrapper>
-                        </AuthenticationWrapper>
+                        <SidebarProvider defaultOpen={false}>
+                            <AuthenticationWrapper>
+                                <OnboardWrapper>
+                                    <AppSidebar />
+                                    <main className="w-full">
+                                        <Navbar />
+                                        {children}
+                                    </main>
+                                </OnboardWrapper>
+                            </AuthenticationWrapper>
+                        </SidebarProvider>
                     </StoreProviderWrapper>
                 </ThemeProvider>
                 <Toaster richColors />

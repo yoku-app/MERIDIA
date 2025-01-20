@@ -6,6 +6,7 @@ import { Session } from "@supabase/supabase-js";
 import Link from "next/link";
 import { FC } from "react";
 import { Button } from "../button";
+import { SidebarTrigger } from "../sidebar";
 import { ModeToggle } from "../themeToggle";
 
 interface AuthenticatedProps extends Session {
@@ -21,7 +22,9 @@ export const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
     return (
         <NavbarWrapper>
             <div className="w-full flex">
-                <div className="w-auto flex-grow">Authenticated</div>
+                <div className="w-auto flex-grow">
+                    <SidebarTrigger />
+                </div>
                 <div>{userProfile?.displayName}</div>
                 <div className="mr-2">
                     <Button onClick={handleSignout} variant={"outline"}>

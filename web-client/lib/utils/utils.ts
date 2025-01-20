@@ -28,3 +28,14 @@ export const OTPFormSchema = z.object({
 });
 
 export type FormOTP = z.infer<typeof OTPFormSchema>;
+
+export const getInitials = (name: string): string => {
+    // Split the name into parts, filtering out empty strings caused by extra spaces
+    const nameParts = name.trim().split(/\s+/);
+
+    // Extract the first letter of each part and limit to the first two
+    const initials = nameParts.map((part) => part[0].toUpperCase()).slice(0, 2);
+
+    // Join the initials into a single string
+    return initials.join("");
+};

@@ -1,3 +1,4 @@
+import { CalendarIcon } from "lucide-react";
 import React from "react";
 
 // FCWC: FunctionComponentWithChildren
@@ -28,3 +29,4 @@ export interface ControllerResponse<T> {
 
 export type HorizontalPosition = "left" | "center" | "right";
 export type VerticalPosition = "top" | "center" | "bottom";
+export type IconType = typeof CalendarIcon; 
