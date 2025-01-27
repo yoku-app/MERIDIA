@@ -5,7 +5,28 @@ export const fetchUserProfile = async (
     userId: string
 ): Promise<ControllerResponse<UserProfile>> => {
     const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + `p/user/${userId}`,
+        process.env.NEXT_PUBLIC_API_URL + `p/user/id/${userId}`,
+        {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+    );
+
+    if (response.ok) {
+        const data = await response.json();
+        return { status: response.status, data };
+    }
+
+    return { status: response.status, error: response.statusText };
+};
+
+export const fetchUserProfileByEmail = async (
+    email: string
+): Promise<ControllerResponse<UserProfile>> => {
+    const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `p/user/email/${email}`,
         {
             method: "GET",
             headers: {
