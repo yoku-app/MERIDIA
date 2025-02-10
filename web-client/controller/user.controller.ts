@@ -1,15 +1,23 @@
 import { ControllerResponse } from "@/lib/interfaces/shared/interface";
-import { UserProfile } from "@/lib/interfaces/user/user.interface";
+import { Session } from "@supabase/supabase-js";
+import { UserDTO } from "@yoku-app/shared-schemas/dist/types/user/dto/user-dto";
 
-export const fetchUserProfile = async (
-    userId: string
-): Promise<ControllerResponse<UserProfile>> => {
+/**
+ * Will fetch the Current authenticated user's detailed profile from the
+ * active session token
+ * @param {Session} session - The current active session for the user
+ * @returns {UserDTO} - The user's profile
+ */
+export const fetchSessionUser = async (
+    session: Session
+): Promise<ControllerResponse<UserDTO>> => {
     const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + `p/user/${userId}`,
+        process.env.NEXT_PUBLIC_API_URL + `user/session/`,
         {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
             },
         }
     );
@@ -23,10 +31,10 @@ export const fetchUserProfile = async (
 };
 
 export const updateUserProfile = async (
-    user: UserProfile,
-    token: string | null
-): Promise<ControllerResponse<UserProfile>> => {
-    if (!token) {
+    user: UserDTO,
+    session?: Session
+): Promise<ControllerResponse<UserDTO>> => {
+    if (!session?.access_token) {
         return { status: 401, error: "Unauthorized" };
     }
 
@@ -34,7 +42,7 @@ export const updateUserProfile = async (
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.access_token}`,
         },
         body: JSON.stringify(user),
     });

@@ -2,22 +2,20 @@
 
 import { useUserStore } from "@/components/provider/user.provider";
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
-import { Session } from "@supabase/supabase-js";
 import Link from "next/link";
 import { FC } from "react";
 import { Button } from "../button";
 import { SidebarTrigger } from "../sidebar";
 import { ModeToggle } from "../themeToggle";
 
-interface AuthenticatedProps extends Session {
+interface AuthenticatedProps {
     handleSignout: () => Promise<void>;
 }
 
 export const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
     handleSignout,
-    user,
 }) => {
-    const { user: userProfile } = useUserStore((state) => state);
+    const { user } = useUserStore((state) => state);
 
     return (
         <NavbarWrapper>
@@ -25,7 +23,7 @@ export const AuthenticatedNavbar: FC<AuthenticatedProps> = ({
                 <div className="w-auto flex-grow">
                     <SidebarTrigger />
                 </div>
-                <div>{userProfile?.displayName}</div>
+                <div>{user?.name}</div>
                 <div className="mr-2">
                     <Button onClick={handleSignout} variant={"outline"}>
                         Logout

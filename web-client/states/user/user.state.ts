@@ -1,12 +1,13 @@
-import { UserProfile } from "@/lib/interfaces/user/user.interface";
+import { Session } from "@supabase/supabase-js";
+import { UserDTO } from "@yoku-app/shared-schemas/dist/types/user/dto/user-dto";
 
 export type UserState = {
-    user: UserProfile | null;
-    token: string | null;
+    user?: UserDTO;
+    session?: Session;
 };
 
 export type UserActions = {
     // todo: Implement User Store actions
-    setUser: (user: UserProfile | null) => void;
-    setToken: (token: string | null) => void;
+    setUser: (user?: UserDTO) => void;
+    setSession: (session?: Session) => void;
 };

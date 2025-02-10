@@ -1,7 +1,6 @@
 import { useUserStore } from "@/components/provider/user.provider";
 import { Form } from "@/components/ui/form";
 import { updateUserProfile } from "@/controller/user.controller";
-import { UserProfile } from "@/lib/interfaces/user/user.interface";
 import {
     formatURLPath,
     handlePublicFileUpload,
@@ -16,6 +15,7 @@ import {
 } from "@/lib/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { UserDTO } from "@yoku-app/shared-schemas/dist/types/user/dto/user-dto";
 import { Dispatch, FC, ReactElement, SetStateAction, useState } from "react";
 import { useForm, UseFormReturn } from "react-hook-form";
 import { toast } from "sonner";
@@ -72,7 +72,7 @@ interface OnboardFormProps {
 }
 
 export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
-    const { user, token, setUser } = useUserStore((state) => state);
+    const { user, session, setUser } = useUserStore((state) => state);
     const [tab, setTab] = useState<OnboardingTab>("user");
     const [uploadedAvatar, setUploadedAvatar] = useState<Blob | null>(null);
     const [confirmSentTo, setConfirmSentTo] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
     const userOnboardForm: UseFormReturn<UserOnboard> = useForm<UserOnboard>({
         resolver: zodResolver(userOnboardDetailsSchema),
         defaultValues: {
-            displayName: user?.displayName || "",
+            displayName: user?.name || "",
             dob: user?.dob || undefined,
             phone: user?.phone || undefined,
             focus: undefined,
@@ -110,7 +110,7 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
                 client,
                 uploadedAvatar!,
                 "profile-picture",
-                user!.userId,
+                user.id,
                 true
             );
 
@@ -123,14 +123,14 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
         }
 
         // Update User Profile
-        const updatedUser: UserProfile = {
+        const updatedUser: UserDTO = {
             ...user,
             phone: undefinedIfNull(values.phone),
-            displayName: values.displayName,
+            name: values.displayName,
             dob: values.dob,
             focus: values.focus,
             avatarUrl: uploadedAvatar
-                ? formatURLPath("profile-picture", user.userId)
+                ? formatURLPath("profile-picture", user.id)
                 : values.avatarUrl,
             onboardingCompletion: {
                 ...user.onboardingCompletion,
@@ -140,7 +140,7 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
 
         // Update User Database Entry
         const updateProfileToast = toast.loading("Updating Profile...");
-        const response = await updateUserProfile(updatedUser, token);
+        const response = await updateUserProfile(updatedUser, session);
         toast.dismiss(updateProfileToast);
 
         if (!responseSuccess(response) || !response.data) {
@@ -152,7 +152,7 @@ export const OnboardForm: FC<OnboardFormProps> = ({ setProgress }) => {
         // Purposely omit Onboarding Date update in the store
         setUser({
             ...response.data,
-            onboardingCompletion: null,
+            onboardingCompletion: undefined,
         });
 
         toast.success("Profile Updated Successfully");

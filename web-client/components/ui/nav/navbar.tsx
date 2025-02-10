@@ -16,10 +16,5 @@ export const Navbar = async () => {
         return <UnauthenticatedNavbar />;
     }
 
-    return (
-        <AuthenticatedNavbar
-            {...data.session}
-            handleSignout={handleUserSignout}
-        />
-    );
+    return <AuthenticatedNavbar handleSignout={handleUserSignout} />;
 };

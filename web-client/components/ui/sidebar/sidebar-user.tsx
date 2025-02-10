@@ -1,6 +1,6 @@
 import { useIsMobile } from "@/hooks/use-mobile";
-import { UserProfile } from "@/lib/interfaces/user/user.interface";
 import { getInitials } from "@/lib/utils/utils";
+import { UserDTO } from "@yoku-app/shared-schemas/dist/types/user/dto/user-dto";
 import {
     BadgeCheck,
     Bell,
@@ -23,7 +23,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../sidebar";
 
 interface Props {
-    user: UserProfile;
+    user: UserDTO;
 }
 
 export const SidebarUser: FC<Props> = ({ user }) => {
@@ -51,15 +51,13 @@ const UserDetails: FC<Props> = ({ user }) => {
     return (
         <>
             <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatarUrl} alt={user.displayName} />
+                <AvatarImage src={user.avatarUrl} alt={user.name} />
                 <AvatarFallback className="rounded-lg">
-                    {getInitials(user.displayName)}
+                    {getInitials(user.name)}
                 </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                    {user.displayName}
-                </span>
+                <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
             </div>
         </>

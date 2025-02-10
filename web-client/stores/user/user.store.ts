@@ -1,23 +1,19 @@
-import { UserProfile } from "@/lib/interfaces/user/user.interface";
 import { UserActions, UserState } from "@/states/user/user.state";
+import { Session } from "@supabase/supabase-js";
+import { UserDTO } from "@yoku-app/shared-schemas/dist/types/user/dto/user-dto";
 import { createStore } from "zustand/vanilla";
 
 export type UserStore = UserState & UserActions;
 
-export const defaultUserInitState: UserState = {
-    user: null,
-    token: null,
-};
+export const defaultUserInitState: UserState = {};
 
 export const createUserStore = (
     initState: UserState = defaultUserInitState
 ) => {
     return createStore<UserStore>()((set) => ({
         ...initState,
-        setUser: (user: UserProfile | null) =>
-            set((state) => ({ ...state, user })),
-        setToken: (token: string | null) =>
-            set((state) => ({ ...state, token })),
-        // todo: Implement User Related Store actions
+        setUser: (user?: UserDTO) => set((state) => ({ ...state, user })),
+        setSession: (session?: Session) =>
+            set((state) => ({ ...state, session })),
     }));
 };
