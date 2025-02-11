@@ -1,5 +1,6 @@
 import { ImageTransformationOptions } from "@/lib/interfaces/image/image.interface";
 import { ControllerResponse } from "@/lib/interfaces/shared/interface";
+import { Session } from "@supabase/supabase-js";
 
 /**
  * Image File Transformation Service, Allows the following transformations:
@@ -17,9 +18,9 @@ import { ControllerResponse } from "@/lib/interfaces/shared/interface";
 export const transformImage = async (
     image: File,
     options: ImageTransformationOptions,
-    token: string | null
+    session?: Session
 ): Promise<ControllerResponse<Blob>> => {
-    if (!token) {
+    if (!session?.access_token) {
         return { status: 401, error: "Unauthorized" };
     }
 
@@ -43,7 +44,7 @@ export const transformImage = async (
             method: "POST",
             body: formData,
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${session.access_token}`,
             },
         }
     );

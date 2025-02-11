@@ -1,7 +1,6 @@
 "use client";
 
 import { FCWC, Propless } from "@/lib/interfaces/shared/interface";
-import { MockDashboard } from "../feature-modules/onboarding/MockDashboard";
 import { Onboard } from "../feature-modules/onboarding/Onboard";
 import { useUserStore } from "../provider/user.provider";
 
@@ -17,10 +16,5 @@ export const OnboardWrapper: FCWC<Propless> = ({ children }) => {
 
     if (!user || user.onboardingCompletion?.core) return <>{children}</>;
 
-    return (
-        <>
-            <Onboard />
-            <MockDashboard />
-        </>
-    );
+    return <Onboard />;
 };

@@ -4,6 +4,7 @@ import {
     ImageTransformationOptions,
 } from "@/lib/interfaces/image/image.interface";
 import { ControllerResponse } from "@/lib/interfaces/shared/interface";
+import { Session } from "@supabase/supabase-js";
 import { ChangeEvent } from "react";
 
 interface UploadHelperCallbacks {
@@ -33,7 +34,7 @@ export const imageUploadHelper = ({ handleUpload }: UploadHelperCallbacks) => {
  */
 export const handleAvatarImageTransformation = async (
     image: File,
-    token: string | null,
+    session?: Session,
     crop?: ImageCrop
 ): Promise<ControllerResponse<Blob>> => {
     // Define the transformation options
@@ -47,5 +48,5 @@ export const handleAvatarImageTransformation = async (
     };
 
     // Return the transformed image
-    return await transformImage(image, options, token);
+    return await transformImage(image, options, session);
 };

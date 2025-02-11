@@ -50,13 +50,13 @@ const UserDetailsForm: FC<UserDetailsFormProps> = ({
     setConfirmationSentTo,
 }) => {
     const { control, trigger, setValue } = form;
-    const { token } = useUserStore((state) => state);
+    const { session } = useUserStore((state) => state);
     const formDetails = useWatch({ control });
 
     const handleAvatarUpload = async (image: File): Promise<void> => {
         // Resize Uploaded Image and convert to WebP
         const response: ControllerResponse<Blob> =
-            await handleAvatarImageTransformation(image, token);
+            await handleAvatarImageTransformation(image, session);
 
         if (!responseSuccess(response) || !response.data) {
             // todo: Handle Error

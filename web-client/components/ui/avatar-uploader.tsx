@@ -1,10 +1,10 @@
 import { imageUploadHelper } from "@/lib/utils/image/image.util";
-import { Label } from "@radix-ui/react-dropdown-menu";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import { FC, useRef } from "react";
 import { Button } from "./button";
 import { Input } from "./input";
+import { Label } from "./label";
 
 interface AvatarUploaderProps {
     onUpload: (file: File) => Promise<void>;
