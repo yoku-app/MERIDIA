@@ -39,3 +39,9 @@ export const getInitials = (name: string): string => {
     // Join the initials into a single string
     return initials.join("");
 };
+
+export const allNotNull = <T>(
+    values: (T | null)[]
+): values is NonNullable<T>[] => {
+    return values.every((value) => value !== null);
+};

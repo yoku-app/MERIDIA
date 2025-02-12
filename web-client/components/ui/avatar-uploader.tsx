@@ -11,12 +11,14 @@ interface AvatarUploaderProps {
     onRemove?: () => void;
     imageURL?: string;
     title?: string;
+    submitButtonClass?: string;
 }
 
 export const AvatarUploader: FC<AvatarUploaderProps> = ({
     onUpload,
     imageURL,
     onRemove,
+    submitButtonClass,
     title = "Profile Picture",
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +82,7 @@ export const AvatarUploader: FC<AvatarUploaderProps> = ({
                         type="button"
                         onClick={uploadFile}
                         variant={"outline"}
+                        className={submitButtonClass}
                     >
                         <Upload className="w-4 h-4" />
                         <span>Upload Picture</span>

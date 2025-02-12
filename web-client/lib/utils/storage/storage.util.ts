@@ -2,7 +2,7 @@ import { SupabaseClientResponse } from "@/lib/interfaces/shared/interface";
 import { StorageError } from "@supabase/storage-js/dist/module/lib/errors";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-const storageBuckets = ["profile-picture"] as const;
+const storageBuckets = ["profile-picture", "organisation-profile"] as const;
 type Bucket = (typeof storageBuckets)[number];
 
 export type StorageResponse = SupabaseClientResponse<StorageError, string>;
