@@ -1,5 +1,6 @@
 "use client";
 
+import { useOrganisationStore } from "@/components/provider/organisation.provider";
 import { useUserStore } from "@/components/provider/user.provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,6 +64,9 @@ export type OrganisationFormValues = z.infer<typeof organisationCreationSchema>;
 
 export const OrganisationCreationForm = () => {
     const { user, session } = useUserStore((state) => state);
+    const { userOrganisations, setUserOrganisations, setActiveOrganisation } =
+        useOrganisationStore((state) => state);
+
     const [uploadedAvatar, setUploadedAvatar] = useState<Blob | null>(null);
     const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState<
         string | undefined
@@ -132,6 +136,10 @@ export const OrganisationCreationForm = () => {
         }
 
         toast.success("Organisation created successfully");
+        const { data } = response;
+        setUserOrganisations([data, ...userOrganisations]);
+        setActiveOrganisation(data);
+
         router.push(`/organisation`);
         setPendingSubmission(false);
     };
